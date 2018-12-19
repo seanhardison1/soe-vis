@@ -1,0 +1,24 @@
+---
+title:
+output:
+    pdf_document:
+      latex_engine: xelatex
+      keep_tex: yes
+      includes:
+        in_header: header.tex
+geometry: "left=2cm, right=2cm, top=2cm, bottom=3cm, footskip = .5cm"
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, dev = "cairo_pdf", fig.width = 8)
+```
+
+# `Introduction`
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget porta erat. Morbi consectetur est vel gravida pretium. Suspendisse ut dui eu ante cursus gravida non sed sem. Phasellus mauris velit, dapibus finibus elementum vel, pulvinar non tellus. Nunc pellentesque pretium diam, quis maximus dolor faucibus id. Nunc convallis sodales ante, ut ullamcorper est egestas vitae. Nam sit amet enim ultrices, ultrices elit pulvinar, volutpat risus.
+
+A list
+
+- Item 1
+- Item 2
+

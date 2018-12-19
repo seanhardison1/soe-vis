@@ -1,0 +1,682 @@
+---
+title:
+output:
+    pdf_document:
+      latex_engine: xelatex
+      keep_tex: yes
+      includes:
+        in_header: header.tex
+geometry: "left=2cm, right=2cm, top=2cm, bottom=3cm, footskip = .5cm"
+fontsize: 11pt
+mainfont: Garamond
+monofont: Calibri
+header-includes:
+  \usepackage{float}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, dev = "cairo_pdf", fig.height = 7,fig.pos = 'h')
+library(ggplot2)
+library(dplyr)
+library(AICcmodavg)
+library(nlme)
+library(here)
+library(data.table)
+library(patchwork)
+library(stringr)
+library(soe.data)
+library(sp)
+library(rgdal)
+library(raster)
+library(gridExtra)
+library(grid)
+library(cowplot)
+
+data.dir <- here("data")
+r.dir <- here("R")
+gis.dir <- here("gis")
+
+load(file.path(data.dir, "SOE.data.Rdata"))
+load(file.path(data.dir, "zooplankton.Rdata"))
+source(file.path(r.dir,"soe_plot.R"))
+source(file.path(r.dir,"fit_lm.R"))
+
+#get map data and set constants
+#projection
+map.crs <- CRS("+proj=longlat +lat_1=35 +lat_2=45 +lat_0=40 +lon_0=-77 +x_0=0
+               +y_0=0 +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
+crs <- "+proj=longlat +lat_1=35 +lat_2=45 +lat_0=40 +lon_0=-77 +x_0=0 +y_0=0 +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
+
+#New coastline
+new_coast <- rnaturalearth::ne_countries(scale = 10,
+                                            continent = "North America",
+                                            returnclass = "sf") %>%
+  sf::st_transform(crs = crs)
+
+#EPUs
+epu_shp <- readOGR(file.path(gis.dir, "EPU_Extended.shp"), verbose = F) 
+crs(epu_shp) <- crs
+epu_shp <- as(epu_shp, "sf")
+epu_shp <- epu_shp %>% filter(EPU %in% c("MAB","GB","GOM"))
+
+#Black sea bass
+source(file.path(r.dir, "get_bsb.R"))
+bsb <- get_bsb()
+
+#Constants
+epu <- "MAB"
+feeding.guilds <- c("Apex Predator","Piscivore","Planktivore","Benthivore","Benthos")
+
+#Time series constants
+shade.alpha <- 0.3
+shade.fill <- "lightgrey"
+lwd <- 1
+pcex <- 2
+trend.alpha <- 0.5
+trend.size <- 2
+hline.size <- 1
+hline.alpha <- 0.25
+hline.lty <- "dashed"
+label.size <- 5
+hjust.label <- 1.5
+
+#Function for custom ggplot facet labels
+label <- function(variable,value){
+  return(facet_names[value])
+}
+
+theme_map <- function(...) {
+  theme_minimal() +
+  theme(
+    text = element_text(family = "Ubuntu Regular", color = "#22211d"),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    # panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
+    panel.grid.major = element_line(color = "#ebebe5", size = 0.2),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA), 
+    panel.background = element_rect(fill = "white", color = NA), 
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.border = element_blank()
+  )
+}
+
+```
+
+# `Introduction`
+
+\begin{figure}
+\centering
+\includegraphics[width=400pt]{gf_human_activities.png}
+\caption{Gulf of Maine and Georges bank ecosystem (I know it isn't the right figure...)}
+\label{fig:conceptual}
+\end{figure}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut **enim blandit volutpat** maecenas. Blandit turpis cursus in hac habitasse platea dictumst. Et netus et malesuada fames ac turpis egestas maecenas. Quis commodo odio aenean sed adipiscing diam. Sapien pellentesque habitant morbi tristique senectus. Gravida arcu ac tortor dignissim convallis aenean et. Vulputate enim nulla aliquet porttitor lacus luctus. Id venenatis a condimentum vitae sapien pellentesque habitant. Eu consequat ac felis donec et. Scelerisque eleifend donec pretium vulputate. Sed blandit libero volutpat sed cras ornare. Quis vel eros donec ac odio tempor orci.
+
+Mi eget mauris pharetra et ultrices neque ornare. Neque volutpat ac tincidunt vitae. Ullamcorper morbi tincidunt ornare massa eget egestas purus viverra. Sagittis nisl rhoncus mattis rhoncus urna neque viverra justo. **Ut tellus elementum sagittis vitae et leo duis. Ultrices neque ornare aenean euismod** elementum nisi quis eleifend quam. Convallis posuere morbi leo urna. Neque egestas congue quisque egestas diam. Figure \ref{fig:conceptual} ed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque. Sit amet tellus cras adipiscing enim.
+
+*    Tempor orci dapibus ultrices in iaculis 
+*    Nunc sed augue lacus. Pulvinar elementum
+*    Integer enim neque volutpat ac tincidunt
+*    vitae semper. Felis bibendum ut tristique et egestas quis ipsum suspendisse.
+
+Neque egestas congue quisque egestas diam. Sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque. Sit amet tellus cras adipiscing enim. Tempor orci dapibus ultrices in iaculis nunc sed augue lacus. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper. Felis bibendum ut tristique et egestas quis ipsum suspendisse.
+
+Mi eget mauris pharetra et ultrices neque ornare. Neque volutpat ac tincidunt vitae. Ullamcorper morbi tincidunt ornare massa eget egestas purus viverra. Sagittis nisl rhoncus mattis rhoncus urna neque viverra justo. Ut tellus elementum sagittis vitae et leo duis. Ultrices neque ornare aenean euismod elementum nisi quis eleifend quam. Convallis posuere morbi leo urna. Neque egestas congue quisque egestas diam. Sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque. Sit amet tellus cras adipiscing enim. Tempor orci dapibus ultrices in iaculis nunc sed augue lacus. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper. Felis bibendum ut tristique et egestas quis ipsum suspendisse.
+
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque felis imperdiet proin fermentum leo vel orci porta non. Pellentesque habitant morbi tristique senectus et. Sollicitudin nibh sit amet commodo. Magnis dis parturient montes nascetur ridiculus mus mauris vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit libero volutpat sed cras. Pharetra et ultrices neque ornare aenean euismod elementum nisi. Risus nec feugiat in fermentum posuere urna. Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra. Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit. Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum. Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id semper risus in. Egestas purus viverra accumsan in nisl.
+
+**Table 1**: New England ecosystem objectives
+```{r obj_cats_NE, echo = FALSE, message = FALSE, warnings = FALSE, results = 'asis'}
+
+tabl <- "
+| Objective Categories     | Indicators reported here                                  |
+|:-------------------------|:----------------------------------------------------------|
+| Seafood production       | Landings by feeding guild                                 |
+| Profits                  | Revenue by feeding guild                                  |
+| Recreation               | Number of anglers and trips; recreational catch           |
+| Stability                | Diversity indices (fishery and species)                   |
+| Social-Cultural          | Commercial and recreational reliance; social vulnerability|
+| Biomass                  | Biomass or abundance by feeding guild from surveys        |
+| Productivity             | Condition and recruitment of NEFMC managed species        |
+| Trophic structure        | Relative biomass of feeding guilds, primary productivity  |
+| Habitat                  | Thermal habitat projections, estimated habitat occurrence |
+"
+cat(tabl) # output the table in a format good for HTML/PDF/docx conversion
+
+```
+
+  
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque felis imperdiet proin fermentum leo vel orci porta non. Pellentesque habitant morbi tristique senectus et. Sollicitudin nibh sit amet commodo. Magnis dis parturient montes nascetur ridiculus mus mauris vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit libero volutpat sed cras. Pharetra et ultrices neque ornare aenean euismod elementum nisi. Risus nec feugiat in fermentum posuere urna. Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra. Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit. Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum. Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id semper risus in. Egestas purus viverra accumsan in nisl.
+
+```{r }
+
+scalar <- 1000
+
+#Filter and map for faceting time series figures
+MAB_landings <- SOE.data %>%
+  filter(str_detect(Var, "Landings MAB|MAFMC managed"),
+         !str_detect(Var, "OTHER|Other|Total"),
+         Time >= 1986,
+         EPU == epu) %>% 
+  mutate(collect.guild = str_extract(Var,paste(feeding.guilds, collapse = "|")),
+         feeding.guild = factor(collect.guild, levels = feeding.guilds),
+         grouping = factor(ifelse(str_detect(Var,"MAFMC"), "managed", "total"))) %>% 
+  dplyr::select(-collect.guild) %>%
+  group_by(Var) %>% 
+  mutate(hline = mean(Value))
+  
+label_loc <- MAB_landings %>%
+  group_by(feeding.guild) %>%
+  dplyr::summarise(yloc = max(Value)*0.95,
+                   xloc = min(Time)) %>% 
+  mutate(label = LETTERS[1:5])
+
+
+#Constants for figure
+x.shade.max <- max(MAB_landings$Time)
+x.shade.min <- x.shade.max - 9 
+series.col <- c("indianred","orange","purple","black")
+
+#plot
+ggplot(data = MAB_landings) +
+  
+  #Highlight last ten years
+  annotate("rect", fill = shade.fill, alpha = shade.alpha,
+      xmin = x.shade.min , xmax = x.shade.max,
+      ymin = -Inf, ymax = Inf) +
+  
+  #Test for trend and add lines
+  stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+  
+  #Add time series
+  geom_line(aes(x = Time, y = Value, color = grouping), size = lwd) +
+  geom_point(aes(x = Time, y = Value, color = grouping), size = pcex) +
+  scale_color_manual(values = series.col, aesthetics = "color")+
+  guides(color = FALSE) +
+  geom_hline(aes(yintercept = hline,
+                 group = Var),
+             size = hline.size,
+             alpha = hline.alpha,
+             linetype = hline.lty)+
+  
+  #Facet 
+  facet_grid(feeding.guild~.,scales = "free_y") +
+  
+  #Axis and theme
+  scale_y_continuous(labels = function(l){trans = l / 1000})+
+  geom_text(data = label_loc, aes(x = xloc, y = yloc, label = label),
+          size = label.size, hjust = hjust.label)+
+  ylab(expression("Landings, 10"^3*"metric tons"))+
+  theme_minimal() +
+  theme(strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        strip.text = element_blank(),
+        text=element_text(family="sans"),
+         panel.spacing = unit(0, "lines"))+
+  labs(title = "Sans font - theme_minimal()")
+  
+```
+  
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem et. Et pharetra pharetra massa massa. Commodo sed egestas egestas fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor massa id. Erat velit scelerisque in dictum non consectetur a erat nam. Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis. Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+# `Human Dimensions`
+## `Seafood production`
+
+```{r }
+
+#plot
+ggplot(data = MAB_landings) +
+  
+  #Highlight last ten years
+  annotate("rect", fill = shade.fill, alpha = shade.alpha,
+      xmin = x.shade.min , xmax = x.shade.max,
+      ymin = -Inf, ymax = Inf) +
+  
+  #Test for trend and add lines
+  stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+  
+  #Add time series
+  geom_line(aes(x = Time, y = Value, color = grouping), size = lwd) +
+  geom_point(aes(x = Time, y = Value, color = grouping), size = pcex) +
+  scale_color_manual(values = series.col, aesthetics = "color")+
+  guides(color = FALSE) +
+  geom_hline(aes(yintercept = hline,
+                 group = Var),
+             size = hline.size,
+             alpha = hline.alpha,
+             linetype = hline.lty)+
+  
+  #Facet 
+  facet_grid(feeding.guild~.,scales = "free_y") +
+  
+  #Axis and theme
+  scale_y_continuous(labels = function(l){trans = l / 1000})+
+  geom_text(data = label_loc, aes(x = xloc, y = yloc, label = label),
+        size = label.size, hjust = hjust.label)+
+  ylab(expression("Landings, 10"^3*"metric tons"))+
+  theme_classic() +
+  theme(strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        strip.text = element_blank(),        
+        text=element_text(family="serif"),
+         panel.spacing = unit(1, "lines"))+
+  labs(title = "Serif font - theme_classic()") 
+
+```
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem et. Et pharetra pharetra massa massa. Commodo sed egestas egestas fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor massa id. Erat velit scelerisque in dictum non consectetur a erat nam. Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis. Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+```{r }
+#plot
+ggplot(data = MAB_landings) +
+  
+  #Highlight last ten years
+  annotate("rect", fill = shade.fill, alpha = shade.alpha,
+      xmin = x.shade.min , xmax = x.shade.max,
+      ymin = -Inf, ymax = Inf) +
+  
+  #Test for trend and add lines
+  stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+  
+  #Add time series
+  geom_line(aes(x = Time, y = Value, color = grouping), size = lwd) +
+  geom_point(aes(x = Time, y = Value, color = grouping), size = pcex) +
+  scale_color_manual(values = series.col, aesthetics = "color")+
+  guides(color = FALSE) +
+  geom_hline(aes(yintercept = hline,
+                 group = Var),
+             size = hline.size,
+             alpha = hline.alpha,
+             linetype = hline.lty)+
+  
+  #Facet 
+  facet_grid(feeding.guild~.,scales = "free_y") +
+  
+  #Axis and theme
+  scale_y_continuous(labels = function(l){trans = l / 1000})+
+  ylab(expression("Landings, 10"^3*"metric tons"))+
+  geom_text(data = label_loc, aes(x = xloc, y = yloc, label = label),
+      size = label.size, hjust = hjust.label)+
+   theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        text=element_text(family="serif"),
+        strip.text = element_blank())+
+  ggtitle("Serif font - theme_bw()") 
+   
+
+
+```
+
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque felis imperdiet proin fermentum leo vel orci porta non. Pellentesque habitant morbi tristique senectus et. Sollicitudin nibh sit amet commodo. Magnis dis parturient montes nascetur ridiculus mus mauris vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit libero volutpat sed cras. Pharetra et ultrices neque ornare aenean euismod elementum nisi. Risus nec feugiat in fermentum posuere urna. Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra. Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit. Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum. Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id semper risus in. Egestas purus viverra accumsan in nisl.
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem et. Et pharetra pharetra massa massa. Commodo sed egestas egestas fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor massa id. Erat velit scelerisque in dictum non consectetur a erat nam. Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis. Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+```{r, echo = F, warning=F, message=F, fig.align='left',fig.height=6}
+facet_names <- list(
+  'centropages zoo spring'=expression(paste(italic("Centropages "), "spring")),
+  'centropages zoo fall'=expression(paste(italic("Centropages "), "fall")),
+  'temora zoo spring'=expression(paste(italic("Temora "), "spring")),
+  'temora zoo fall' = expression(paste(italic("Temora "), "fall")),
+  'temora zoo spring'=expression(paste(italic("Pseudocalanus "), "spring")),
+  'temora zoo fall' = expression(paste(italic("Pseudocalanus "), "fall")))
+
+xmin <- min(zoo$Time)
+series.col <- c("purple","orange")
+ggplot(data = zoo, aes(x = Time, y = Value)) +
+    ylab(expression("Abundance log num m"^-3*"")) +
+    xlab("Year") +
+    xlim(xmin, NA) +
+    geom_line() +
+    geom_point()+
+  scale_color_manual(values = series.col, aesthetics = "color")+
+  geom_ribbon(aes(x = Time,
+                  ymin = sd.low,
+                  ymax = sd.high,
+                  group = Var), alpha = 0.1)+
+      stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+
+  guides(color = FALSE)+
+    facet_wrap(Var ~ ., nrow = 3, ncol = 2, labeller = label) +
+    theme_bw() +
+    theme(strip.background = element_blank(),
+        text=element_text(family="serif")) +
+    ggtitle("Text over figures rather than letter labels, +/- 1 SD")
+```
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque felis imperdiet proin fermentum leo vel orci porta non. Pellentesque habitant morbi tristique senectus et. Sollicitudin nibh sit amet commodo. Magnis dis parturient montes nascetur ridiculus mus mauris vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit libero volutpat sed cras. Pharetra et ultrices neque ornare aenean euismod elementum nisi. Risus nec feugiat in fermentum posuere urna. Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra. Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit. Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum. Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id semper risus in. Egestas purus viverra accumsan in nisl.
+
+#### More effective visualization of grouped indicator data.
+
+```{r maps, fig.width = 8, fig.height = 4}
+#Map limits
+xmin = -76
+xmax = -66
+ymin = 36
+ymax = 45
+xlims <- c(xmin, xmax)
+ylims <- c(ymin, ymax)
+
+new_map <- ggplot()+
+    geom_raster(data =  bsb, aes(x = long, y = lat, fill = value)) +
+    scale_fill_gradient2(low = scales::muted("blue"),
+                         mid = "white",
+                         high = scales::muted("red"),
+                         midpoint = 0.5)+
+    guides(fill = guide_colourbar(label = FALSE,barwidth = 0.75,
+                                  title = "Thermal\n habitat",
+                                  title.theme = element_text(size = 8),
+                                  hjust = 0.25))+
+    geom_sf(data = new_coast) +
+    geom_sf(data = epu_shp, fill = "transparent")+
+    coord_sf(crs = crs, xlim = xlims, ylim = ylims,datum=NA)+
+    labs(title = "Fall Thermal Habitat")+
+    theme(plot.title=element_text(size=10, face = "plain"))+
+    xlab("Longitude")+
+    ylab("Latitude")
+
+bsb_out <- SOE.data %>% filter(str_detect(Var, "fall mean along-shelf dist|fall mean depth"),
+                    str_detect(Var, "black sea bass")) 
+series.col2 <- c("purple","black", "purple","black")
+#mean depth
+bsb_md <- bsb_out %>% filter(str_detect(Var, "mean depth")) %>% 
+  ggplot()+
+    #Test for trend and add lines
+  stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+  guides(color = FALSE)+
+  #Add time series
+  geom_line(aes(x = Time, y = Value), size = lwd) +
+  geom_point(aes(x = Time, y = Value), size = pcex) +
+  scale_color_manual(values = series.col2, aesthetics = "color")+
+  theme_minimal() +
+  labs(title = "Fall Mean Depth")+
+  theme(plot.title=element_text(size=10))
+
+bsb_asd <- bsb_out %>% filter(str_detect(Var, "along-shelf")) %>% 
+  ggplot()+
+    #Test for trend and add lines
+  stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+  guides(color = FALSE)+
+  #Add time series
+  geom_line(aes(x = Time, y = Value), size = lwd) +
+  geom_point(aes(x = Time, y = Value), size = pcex) +
+  scale_color_manual(values = series.col2, aesthetics = "color")+
+  theme_minimal() +
+  labs(title = "Fall Along-shelf Distance")+
+  theme(plot.title=element_text(size=10))
+
+
+first_col <- cowplot::plot_grid(new_map, ncol = 1, labels = "A")
+second_col <- cowplot::plot_grid(bsb_asd, bsb_md, ncol = 1, labels = c("B","C"))
+gridded <- plot_grid(first_col, second_col, ncol = 2, label_fontface = "plain")
+gridded
+```
+
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem et. Et pharetra pharetra massa massa. Commodo sed egestas egestas fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor massa id. Erat velit scelerisque in dictum non consectetur a erat nam. Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis. Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+  
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque felis imperdiet proin fermentum leo vel orci porta non. Pellentesque habitant morbi tristique senectus et. Sollicitudin nibh sit amet commodo. Magnis dis parturient montes nascetur ridiculus mus mauris vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit libero volutpat sed cras. 
+
+```{r, fig.width=8, fig.height = 7}
+sml_lrg <- SOE.data %>%
+  filter(str_detect(Var, "Small-Large copepod Index"),
+         EPU == "GOM")
+
+textdf <- data.frame(x = c(1981,1995,2007),
+                     y = c(1.15,-0.5,1.15),
+                     text = c("Large-bodied regime",
+                              "Small-bodied regime",
+                              "Large-bodied regime"))
+cop_plot <- ggplot(sml_lrg) +
+    geom_vline(aes(xintercept = 1989)) +
+  geom_vline(aes(xintercept = 2002)) +
+  geom_line(aes(x = Time, y = Value, color = EPU)) +
+  ylab("Small-Large Index") +
+  labs(title = "Highlighting regime shifts")+
+  guides(color  = FALSE)+
+  geom_text(data = textdf, aes(x = x, y=y, label = text)) +
+  theme_bw()
+
+all_epu <- SOE.data %>% filter(str_detect(Var, "productivity"),
+                                                    EPU %in% c("GOM"))
+all_epu$Var <- str_trim(str_replace(all_epu$Var,
+                                   " GOM productivity", ""))
+
+# Adjust plot properties
+adjustAxes <- 
+  ggplot2::theme(axis.title   = element_text(size = 10),
+                 axis.text    = element_text(size = 10),
+                 plot.title   = element_text(size = 20))
+
+ggplot <- function(...) { ggplot2::ggplot(...)  + 
+    ggplot2::theme_bw() + 
+    adjustAxes}
+
+
+# Plot stacked bar with cpts for single var 
+plot_stackbarcpts_single <- function(YEAR, var2bar,
+                                     x, xlab, ylab,
+                                     titl,
+                                     file_suffix,
+                                     leg_font_size = 10,
+                                     remove_leg = FALSE,
+                                     leg_ncol = 1,
+                                     wcpts = TRUE,
+                                     wdashed = TRUE,
+                                     height = 5.5,
+                                     width = 8) {
+  
+  dat2bar <- data.frame(YEAR, var2bar,
+                        x)
+  
+  dat2plot <-
+    dat2bar %>%
+    tidyr::gather(variable, value, -YEAR, -var2bar) %>%
+    dplyr::mutate(var2bar = gsub(pattern      = "_", 
+                                 replacement  = " ", 
+                                 x            = var2bar),
+                  var2bar = gsub(pattern      = "Atl.", 
+                                 replacement  = "", 
+                                 x            = var2bar),
+                  var2bar = gsub(pattern      = "Atl", 
+                                 replacement  = "", 
+                                 x            = var2bar),
+                  var2bar = gsub(pattern      = "NS and combined", 
+                                 replacement  = "", 
+                                 x            = var2bar),
+                  var2bar = gsub(pattern      = "YT", 
+                                 replacement  = "Yellowtail", 
+                                 x            = var2bar),
+                  var2bar = gsub(pattern      = " GoM", 
+                                 replacement  = " GOM", 
+                                 x            = var2bar))
+  
+  
+  p <-   
+    ggplot(dat2plot,
+           aes(x = YEAR)) +
+                    geom_vline(aes(xintercept = 1989)) +
+    geom_vline(aes(xintercept = 2002)) +
+    geom_bar(data = dat2plot %>% filter(value > 0),
+             aes(y = value, fill = var2bar),
+             stat = "identity") +
+    geom_bar(data = dat2plot %>% filter(value < 0),
+             aes(y = value, fill = var2bar),
+             stat = "identity") +
+    geom_hline(size = 0.3, aes(yintercept = 0)) +
+    xlab(xlab) +
+    ylab(ylab) +
+    ggtitle(titl) +
+    guides(fill = guide_legend(ncol = leg_ncol)) +
+    theme(axis.title   = element_text(size = 10),
+          axis.text    = element_text(size = 10),
+          plot.title   = element_text(size = 20),
+          legend.text  = element_text(size = leg_font_size),
+          legend.title = element_blank())
+  
+  if(remove_leg) p <- p + theme(legend.position = "none")
+  
+  return(p)
+}
+
+
+
+# Recruit per spawner (all stocks in one figure)
+GB_prod <- plot_stackbarcpts_single(YEAR = all_epu$Time,
+                         var2bar = all_epu$Var,
+                         x = all_epu$Value,
+                         titl = "",
+                         xlab = "",
+                         ylab = "Small fish per large fish biomass (anomaly)",
+                         height = 7,
+                         width = 9)
+
+
+cowplot::plot_grid(cop_plot, GB_prod, ncol = 1, align = "h")
+```
+
+
+Pharetra et ultrices neque ornare aenean euismod elementum nisi. Risus nec feugiat in fermentum posuere urna. Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra. Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit. Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum. Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id semper risus in. Egestas purus viverra accumsan in nisl.
+
+# `Problem figures`
+
+```{r Bennet-indicator, fig.align='center', fig.height = 4}
+adjustAxes <- 
+  ggplot2::theme(axis.title   = element_text(size = 10),
+                 axis.text    = element_text(size = 10),
+                 plot.title   = element_text(size = 10))
+epu <- "GB"
+#Load data for Georges Bank
+ytotal <- SOE.data %>% filter(Units == "million USD ($2015)",
+                    stringr::str_detect(Var, "by EPU"),
+                    EPU == epu)
+ytotal$Var <- stringr::str_remove(ytotal$Var, "by EPU")
+
+#Calculate Bennet indicator as the sum of price and volume indicators
+#This step was accomplished above when the data.frame "biyear" was created
+BI <- ytotal %>%
+  group_by(EPU, Time) %>%
+  dplyr::summarise(revchange = sum(Value)) 
+
+#Subset by sign
+viy1<-subset(ytotal, (stringr::str_detect(ytotal$Var, "VI") & Value>=0))
+viy2<-subset(ytotal, (stringr::str_detect(ytotal$Var, "VI") & Value<0))
+piy1<-subset(ytotal, (stringr::str_detect(ytotal$Var, "PI") & Value>=0))
+piy2<-subset(ytotal, (stringr::str_detect(ytotal$Var, "PI") & Value<0))
+
+#plot
+BI<-ggplot()+geom_bar(data=viy1, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  geom_bar(data=viy2, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  geom_bar(data=piy1, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  geom_bar(data=piy2, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  ggtitle("Revenue Change ($2015), Price (PI) and Volume Indicator (VI)", subtitle=paste0(epu," EPU 1964-2016 Compared to Average Year")) +
+  labs(x="YEAR", y="Value $1,000,000 ($2015)") +
+  scale_fill_brewer(name="Indicator",palette = "Set2")+
+  geom_line(data=BI, aes(x=Time, y=revchange, colour="$"))+
+  scale_colour_grey(name="Revenue Change")+
+  theme(plot.title = element_text(hjust=0.3),plot.subtitle=element_text(hjust=0.5))
+VI <- SOE.data %>% filter(Units == "million USD ($2015)",
+                    !stringr::str_detect(Var, "by EPU"),
+                    stringr::str_detect(Var, "VI"),
+                    EPU == epu)
+VI$Var <- stringr::str_remove(VI$Var,"VI")
+
+#Subset by sign
+vi1<-subset(VI, Value >= 0)
+vi2<-subset(VI, Value < 0)
+
+#Volume indicator
+volind <- VI %>% group_by(Time) %>% dplyr::summarise(revchange = sum(Value))
+
+VI<-ggplot()+geom_bar(data=vi1, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  geom_bar(data=vi2, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  ggtitle(paste0("Volume Indicator ($2015) Year 2000 Base\n",epu," EPU 1964-2016")) +
+  labs(x="YEAR", y="Value $1,000,000 ($2015)") +
+  scale_fill_brewer(name= "Feeding Guild", palette="Set1")+
+    geom_line(data=volind , aes(x=Time, y=revchange, colour="$"))+
+  scale_colour_grey(name="VI/PI")+
+  theme(plot.title = element_text(hjust=0.5, size = 10),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 10)) 
+
+
+#Next, use the same algorithm to create Price Indicator graphs
+PI <- SOE.data %>% filter(Units == "million USD ($2015)",
+                    !stringr::str_detect(Var, "by EPU"),
+                    stringr::str_detect(Var, "PI"),
+                    EPU == epu)
+PI$Var <- stringr::str_remove(PI$Var,"PI")
+pi1<-subset(PI, Value >= 0)
+pi2<-subset(PI, Value < 0)
+prind <- PI %>% group_by(Time) %>% dplyr::summarise(revchange = sum(Value))
+
+PI<-ggplot()+geom_bar(data=pi1, aes(x=Time, y=Value, fill=Var), stat="identity") + 
+  geom_bar(data=pi2, aes(x=Time, y=Value, fill=Var), stat="identity")+
+  geom_bar(stat="identity") + 
+  ggtitle(paste0("Price Indicator ($2015) Year 2000 Base\n",epu," EPU 1964-2016")) +
+  labs(x="YEAR", y="Value $1,000,000 ($2015)") +
+  scale_fill_brewer(name= "Feeding Guild", palette="Set1")+
+  geom_line(data=prind, aes(x=Time, y=revchange, colour="$"))+
+  scale_colour_grey(name="VI/PI")+  
+  theme(plot.title = element_text(hjust=0.5, size = 10),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 10)) 
+
+#grid.arrange(VI, PI,BI, nrow = 2,width = 1:2)
+r1 <-plot_grid(BI, ncol = 1)
+r1
+```
+
+```{r plot2, echo = F, eval = T, fig.width=8, fig.height = 4}
+grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, position = c("bottom", "right")) {
+  
+  plots <- list(...)
+  position <- match.arg(position)
+  g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
+  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  lheight <- sum(legend$height)
+  lwidth <- sum(legend$width)
+  gl <- lapply(plots, function(x) x + theme(legend.position="none"))
+  gl <- c(gl, ncol = ncol, nrow = nrow)
+  
+  combined <- switch(position,
+                     "bottom" = arrangeGrob(do.call(arrangeGrob, gl),
+                                            legend,
+                                            ncol = 1,
+                                            heights = unit.c(unit(1, "npc") - lheight, lheight)),
+                     "right" = arrangeGrob(do.call(arrangeGrob, gl),
+                                           legend,
+                                           ncol = 2,
+                                           widths = unit.c(unit(1, "npc") - lwidth, lwidth)))
+  
+  grid.newpage()
+  grid.draw(combined)
+  
+  # return gtable invisibly
+  invisible(combined)
+  
+}
+grid_arrange_shared_legend(VI, PI, ncol = 2, nrow = 1)
+```
+
+
+

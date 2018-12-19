@@ -1,0 +1,378 @@
+\documentclass[11pt,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+    \setmainfont[]{Garamond}
+    \setmonofont[Mapping=tex-ansi]{Calibri}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=3cm, footskip = .5cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{}
+    \pretitle{\vspace{\droptitle}}
+  \posttitle{}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{fontspec}
+\usepackage{ifthen}
+\usepackage{everypage}
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{40pt}
+\lhead{\texttt{\emph{State of the Ecosystem}} \\ \texttt{\emph{Gulf of Maine and Georges Bank}}}
+\cfoot{\thepage}
+
+\AddEverypageHook{%
+   \ifthenelse{\value{page}=1}%
+     {\rhead{\includegraphics[width=40pt]{NOAA_logo.png} \\ \texttt{\emph{Published March 3, 2018}}}
+     }%
+     {\rhead{}
+     }
+}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\begin{document}
+
+\hypertarget{introduction}{%
+\section{\texorpdfstring{\texttt{Introduction}}{Introduction}}\label{introduction}}
+
+\begin{figure}
+\centering
+\includegraphics[width=400pt]{gf_human_activities.png}
+\caption{Gulf of Maine and Georges bank ecosystem (I know it isn't the right figure...)}
+\label{fig:conceptual}
+\end{figure}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut \textbf{enim
+blandit volutpat} maecenas. Blandit turpis cursus in hac habitasse
+platea dictumst. Et netus et malesuada fames ac turpis egestas maecenas.
+Quis commodo odio aenean sed adipiscing diam. Sapien pellentesque
+habitant morbi tristique senectus. Gravida arcu ac tortor dignissim
+convallis aenean et. Vulputate enim nulla aliquet porttitor lacus
+luctus. Id venenatis a condimentum vitae sapien pellentesque habitant.
+Eu consequat ac felis donec et. Scelerisque eleifend donec pretium
+vulputate. Sed blandit libero volutpat sed cras ornare. Quis vel eros
+donec ac odio tempor orci.
+
+Mi eget mauris pharetra et ultrices neque ornare. Neque volutpat ac
+tincidunt vitae. Ullamcorper morbi tincidunt ornare massa eget egestas
+purus viverra. Sagittis nisl rhoncus mattis rhoncus urna neque viverra
+justo. \textbf{Ut tellus elementum sagittis vitae et leo duis. Ultrices
+neque ornare aenean euismod} elementum nisi quis eleifend quam.
+Convallis posuere morbi leo urna. Neque egestas congue quisque egestas
+diam. Figure \ref{fig:conceptual} ed viverra ipsum nunc aliquet bibendum
+enim facilisis gravida neque. Sit amet tellus cras adipiscing enim.
+
+\begin{itemize}
+\tightlist
+\item
+  Tempor orci dapibus ultrices in iaculis
+\item
+  Nunc sed augue lacus. Pulvinar elementum
+\item
+  Integer enim neque volutpat ac tincidunt
+\item
+  vitae semper. Felis bibendum ut tristique et egestas quis ipsum
+  suspendisse.
+\end{itemize}
+
+Neque egestas congue quisque egestas diam. Sed viverra ipsum nunc
+aliquet bibendum enim facilisis gravida neque. Sit amet tellus cras
+adipiscing enim. Tempor orci dapibus ultrices in iaculis nunc sed augue
+lacus. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae
+semper. Felis bibendum ut tristique et egestas quis ipsum suspendisse.
+
+Mi eget mauris pharetra et ultrices neque ornare. Neque volutpat ac
+tincidunt vitae. Ullamcorper morbi tincidunt ornare massa eget egestas
+purus viverra. Sagittis nisl rhoncus mattis rhoncus urna neque viverra
+justo. Ut tellus elementum sagittis vitae et leo duis. Ultrices neque
+ornare aenean euismod elementum nisi quis eleifend quam. Convallis
+posuere morbi leo urna. Neque egestas congue quisque egestas diam. Sed
+viverra ipsum nunc aliquet bibendum enim facilisis gravida neque. Sit
+amet tellus cras adipiscing enim. Tempor orci dapibus ultrices in
+iaculis nunc sed augue lacus. Pulvinar elementum integer enim neque
+volutpat ac tincidunt vitae semper. Felis bibendum ut tristique et
+egestas quis ipsum suspendisse.
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque
+felis imperdiet proin fermentum leo vel orci porta non. Pellentesque
+habitant morbi tristique senectus et. Sollicitudin nibh sit amet
+commodo. Magnis dis parturient montes nascetur ridiculus mus mauris
+vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit
+libero volutpat sed cras. Pharetra et ultrices neque ornare aenean
+euismod elementum nisi. Risus nec feugiat in fermentum posuere urna.
+Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra.
+Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit.
+Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum
+dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum.
+Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id
+velit. Mollis nunc sed id semper risus in. Egestas purus viverra
+accumsan in nisl.
+
+\textbf{Table 1}: New England ecosystem objectives
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.29\columnwidth}\raggedright
+Objective Categories\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright
+Indicators reported here\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Seafood production\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Landings by feeding guild\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Profits\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Revenue by feeding guild\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Recreation\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Number of anglers and trips; recreational catch\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Stability\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Diversity indices (fishery and species)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Social-Cultural\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Commercial and recreational reliance; social vulnerability\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Biomass\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Biomass or abundance by feeding guild from surveys\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Productivity\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Condition and recruitment of NEFMC managed species\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Trophic structure\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Relative biomass of feeding guilds, primary productivity\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\raggedright
+Habitat\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright
+Thermal habitat projections, estimated habitat occurrence\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque
+felis imperdiet proin fermentum leo vel orci porta non. Pellentesque
+habitant morbi tristique senectus et. Sollicitudin nibh sit amet
+commodo. Magnis dis parturient montes nascetur ridiculus mus mauris
+vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit
+libero volutpat sed cras. Pharetra et ultrices neque ornare aenean
+euismod elementum nisi. Risus nec feugiat in fermentum posuere urna.
+Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra.
+Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit.
+Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum
+dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum.
+Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id
+velit. Mollis nunc sed id semper risus in. Egestas purus viverra
+accumsan in nisl.
+
+\includegraphics{font_test_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed
+euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et
+malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem
+et. Et pharetra pharetra massa massa. Commodo sed egestas egestas
+fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor
+massa id. Erat velit scelerisque in dictum non consectetur a erat nam.
+Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis.
+Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris
+augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+\hypertarget{human-dimensions}{%
+\section{\texorpdfstring{\texttt{Human\ Dimensions}}{Human Dimensions}}\label{human-dimensions}}
+
+\hypertarget{seafood-production}{%
+\subsection{\texorpdfstring{\texttt{Seafood\ production}}{Seafood production}}\label{seafood-production}}
+
+\includegraphics{font_test_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed
+euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et
+malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem
+et. Et pharetra pharetra massa massa. Commodo sed egestas egestas
+fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor
+massa id. Erat velit scelerisque in dictum non consectetur a erat nam.
+Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis.
+Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris
+augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+\includegraphics{font_test_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque
+felis imperdiet proin fermentum leo vel orci porta non. Pellentesque
+habitant morbi tristique senectus et. Sollicitudin nibh sit amet
+commodo. Magnis dis parturient montes nascetur ridiculus mus mauris
+vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit
+libero volutpat sed cras. Pharetra et ultrices neque ornare aenean
+euismod elementum nisi. Risus nec feugiat in fermentum posuere urna.
+Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra.
+Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit.
+Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum
+dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum.
+Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id
+velit. Mollis nunc sed id semper risus in. Egestas purus viverra
+accumsan in nisl.
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed
+euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et
+malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem
+et. Et pharetra pharetra massa massa. Commodo sed egestas egestas
+fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor
+massa id. Erat velit scelerisque in dictum non consectetur a erat nam.
+Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis.
+Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris
+augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+\begin{flushleft}\includegraphics{font_test_files/figure-latex/unnamed-chunk-4-1} \end{flushleft}
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque
+felis imperdiet proin fermentum leo vel orci porta non. Pellentesque
+habitant morbi tristique senectus et. Sollicitudin nibh sit amet
+commodo. Magnis dis parturient montes nascetur ridiculus mus mauris
+vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit
+libero volutpat sed cras. Pharetra et ultrices neque ornare aenean
+euismod elementum nisi. Risus nec feugiat in fermentum posuere urna.
+Vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra.
+Lectus mauris ultrices eros in cursus. Ut sem nulla pharetra diam sit.
+Sed viverra tellus in hac. Diam quis enim lobortis scelerisque fermentum
+dui faucibus in ornare. Nec dui nunc mattis enim ut tellus elementum.
+Dolor sed viverra ipsum nunc. Tempor nec feugiat nisl pretium fusce id
+velit. Mollis nunc sed id semper risus in. Egestas purus viverra
+accumsan in nisl.
+
+\hypertarget{more-effective-visualization-of-grouped-indicator-data.}{%
+\paragraph{More effective visualization of grouped indicator
+data.}\label{more-effective-visualization-of-grouped-indicator-data.}}
+
+\includegraphics{font_test_files/figure-latex/maps-1.pdf}
+
+Et tortor consequat id porta nibh venenatis cras sed. Imperdiet sed
+euismod nisi porta lorem mollis aliquam ut porttitor. Et netus et
+malesuada fames ac turpis. Tempus quam pellentesque nec nam aliquam sem
+et. Et pharetra pharetra massa massa. Commodo sed egestas egestas
+fringilla phasellus faucibus. Leo duis ut diam quam nulla porttitor
+massa id. Erat velit scelerisque in dictum non consectetur a erat nam.
+Id aliquet lectus proin nibh nisl. Dolor morbi non arcu risus quis.
+Tempor id eu nisl nunc mi ipsum faucibus vitae. Ac auctor augue mauris
+augue neque. Bibendum neque egestas congue quisque egestas diam in.
+
+Nisl condimentum id venenatis a condimentum vitae sapien. Scelerisque
+felis imperdiet proin fermentum leo vel orci porta non. Pellentesque
+habitant morbi tristique senectus et. Sollicitudin nibh sit amet
+commodo. Magnis dis parturient montes nascetur ridiculus mus mauris
+vitae. Mauris a diam maecenas sed enim ut sem viverra aliquet. Blandit
+libero volutpat sed cras.
+
+\includegraphics{font_test_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+Pharetra et ultrices neque ornare aenean euismod elementum nisi. Risus
+nec feugiat in fermentum posuere urna. Vitae purus faucibus ornare
+suspendisse sed nisi lacus sed viverra. Lectus mauris ultrices eros in
+cursus. Ut sem nulla pharetra diam sit. Sed viverra tellus in hac. Diam
+quis enim lobortis scelerisque fermentum dui faucibus in ornare. Nec dui
+nunc mattis enim ut tellus elementum. Dolor sed viverra ipsum nunc.
+Tempor nec feugiat nisl pretium fusce id velit. Mollis nunc sed id
+semper risus in. Egestas purus viverra accumsan in nisl.
+
+\hypertarget{problem-figures}{%
+\section{\texorpdfstring{\texttt{Problem\ figures}}{Problem figures}}\label{problem-figures}}
+
+\begin{center}\includegraphics{font_test_files/figure-latex/Bennet-indicator-1} \end{center}
+
+\includegraphics{font_test_files/figure-latex/plot2-1.pdf}
+
+
+\end{document}

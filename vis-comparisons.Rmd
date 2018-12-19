@@ -1,0 +1,136 @@
+---
+title: "Comparing visuals"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(AICcmodavg)
+library(nlme)
+library(here)
+library(data.table)
+library(patchwork)
+library(stringr)
+library(soe.data)
+
+data.dir <- here("data")
+r.dir <- here("R")
+
+load(file.path(data.dir, "SOE.data.Rdata"))
+source(file.path(r.dir,"soe_plot.R"))
+source(file.path(r.dir,"fit_lm.R"))
+
+#Constants
+epu <- "MAB"
+feeding.guilds <- c("Apex Predator","Piscivore","Planktivore","Benthivore","Benthos")
+
+#Time series constants
+shade.alpha <- 0.25
+shade.fill <- "lightgrey"
+lwd <- 1
+pcex <- 2
+trend.alpha <- 0.5
+trend.size <- 2
+hline.size <- 1
+hline.alpha <- 0.25
+hline.lty <- "dashed"
+```
+
+
+# Stacked time series
+
+```{r gglandings,echo = F, fig.height=8, out.width='50%'}
+
+#Scalar
+scalar <- 1000
+
+#Filter and map for faceting time series figures
+MAB_landings <- SOE.data %>%
+  filter(str_detect(Var, "Landings MAB|MAFMC managed"),
+         !str_detect(Var, "OTHER|Other|Total"),
+         Time >= 1986,
+         EPU == epu) %>% 
+  mutate(collect.guild = str_extract(Var,paste(feeding.guilds, collapse = "|")),
+         feeding.guild = factor(collect.guild, levels = feeding.guilds),
+         grouping = factor(ifelse(str_detect(Var,"MAFMC"), "managed", "total"))) %>% 
+  dplyr::select(-collect.guild) %>%
+  group_by(Var) %>% 
+  mutate(hline = mean(Value))
+  
+
+#Constants for figure
+x.shade.max <- max(MAB_landings$Time)
+x.shade.min <- x.shade.max - 9 
+series.col <- c("indianred","orange","purple","black")
+
+#plot
+ggplot(data = MAB_landings) +
+  
+  #Highlight last ten years
+  annotate("rect", fill = shade.fill, alpha = shade.alpha,
+      xmin = x.shade.min , xmax = x.shade.max,
+      ymin = -Inf, ymax = Inf) +
+  
+  #Test for trend and add lines
+  stat_gls(aes(x = Time, y = Value,
+               group = Var, color = stat(col)),
+             alpha = trend.alpha, size = trend.size) +
+  
+  #Add time series
+  geom_line(aes(x = Time, y = Value, color = grouping), size = lwd) +
+  geom_point(aes(x = Time, y = Value, color = grouping), size = pcex) +
+  scale_color_manual(values = series.col, aesthetics = "color")+
+  guides(color = FALSE) +
+  geom_hline(aes(yintercept = hline,
+                 group = Var),
+             size = hline.size,
+             alpha = hline.alpha,
+             linetype = hline.lty)+
+  
+  #Facet 
+  facet_grid(feeding.guild~.,scales = "free_y") +
+  
+  #Axis and theme
+  scale_y_continuous(labels = function(l){trans = l / 1000})+
+  ylab(expression("Landings, 10"^3*"metric tons"))+
+  theme_bw() +
+  theme(plot.title = element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        strip.text = element_blank())
+
+```
+
+```{r seafood_landings_MAB, fig.height=8, echo = F, out.width="50%"}
+
+## Ecosystem-wide and managed species total landings
+opar <- par(mfrow = c(5, 1), mar = c(0, 0, 0, 0), oma = c(4, 6.5, 2, 6))
+
+soe.plot(SOE.data, "Time","Apex Predator Landings MAB", stacked = "A",status = F,
+         endshade = T, rel.y.num = 1.1, full.trend = T, scale.axis = 10^3,end.start = 2007, x.start = 1986,
+         ymin = FALSE, y.lower = 0,cex.stacked = 1.5 )
+
+soe.plot(SOE.data, "Time", "Piscivore Landings MAB", stacked = "B",status = F,
+         endshade = T, rel.y.num = 1.1, full.trend = T, scale.axis = 10^3,end.start = 2007, x.start = 1986,
+         ymin = FALSE, y.lower = 0 , extra = TRUE, x.var2 = "Time", 
+         y.var2 = "Piscivore MAFMC managed species sea food MAB",cex.stacked = 1.5)
+
+soe.plot(SOE.data, "Time", "Planktivore Landings MAB", stacked = "C",status = F,
+         endshade = T, rel.y.num = 1.1, full.trend = T, scale.axis = 10^3,end.start = 2007, x.start = 1986,
+         ymin = FALSE, y.lower = 0 , extra = TRUE, x.var2 = "Time", 
+         y.var2 = "Planktivore MAFMC managed species sea food MAB",cex.stacked = 1.5)
+
+soe.plot(SOE.data, "Time", "Benthivore Landings MAB", stacked = "D",status = F,
+         endshade = T, rel.y.num = 1.1, full.trend = T, scale.axis = 10^3,end.start = 2007, x.start = 1986,
+         ymin = FALSE, y.lower = 0 , extra = TRUE, x.var2 = "Time", 
+         y.var2 = "Benthivore MAFMC managed species sea food MAB",cex.stacked = 1.5)
+
+soe.plot(SOE.data, "Time", "Benthos Landings MAB", stacked = "E",status = F,
+         endshade = T, rel.y.num = 1.1, full.trend = T, scale.axis = 10^3,end.start = 2007, x.start = 1986,
+         ymin = FALSE, y.lower = 0 , extra = TRUE, x.var2 = "Time", 
+         y.var2 = "Benthos MAFMC managed species sea food MAB",cex.stacked = 1.5)
+
+soe.stacked.axis("Year", expression("Landings, 10"^3*"metric tons"), x.line = 2.7)
+
+```
